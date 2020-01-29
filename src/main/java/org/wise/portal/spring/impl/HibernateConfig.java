@@ -59,16 +59,17 @@ public class HibernateConfig {
   @Value("${spring.jpa.hibernate.ddl-auto:none}")
   private String hibernateDDLAuto;
 
-  @Bean(name = {"sessionFactory", "entityManagerFactory"})
+  @Bean(name = { "sessionFactory", "entityManagerFactory" })
   public LocalSessionFactoryBean sessionFactory() {
     LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
     sessionFactory.setDataSource(dataSource);
-    sessionFactory.setPackagesToScan(new String[]{"org.wise.portal.domain", "org.wise.vle.domain"});
+    sessionFactory
+        .setPackagesToScan(new String[] { "org.wise.portal.domain", "org.wise.vle.domain" });
     sessionFactory.setHibernateProperties(hibernateProperties());
     return sessionFactory;
   }
 
-  @Bean(name = {"hibernateTransactionManager", "transactionManager"})
+  @Bean(name = { "hibernateTransactionManager", "transactionManager" })
   public PlatformTransactionManager hibernateTransactionManager() {
     HibernateTransactionManager transactionManager = new HibernateTransactionManager();
     transactionManager.setSessionFactory(sessionFactory().getObject());
