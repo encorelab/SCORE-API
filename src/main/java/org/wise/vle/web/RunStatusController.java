@@ -63,9 +63,9 @@ public class RunStatusController {
 
     if (runId == null) {
       /*
-       * this request was most likely caused by a session timeout and the user logging back in which
-       * makes a request to /runStatus without any parameters. in this case we will just redirect
-       * the user back to the WISE home page.
+       * this request was most likely caused by a session timeout and the user logging
+       * back in which makes a request to /runStatus without any parameters.
+       * in this case we will just redirect the user back to the SCORE home page.
        */
       return new ModelAndView("redirect:/");
     }

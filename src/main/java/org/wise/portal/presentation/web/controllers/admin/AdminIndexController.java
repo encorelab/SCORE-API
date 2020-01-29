@@ -95,13 +95,13 @@ public class AdminIndexController<S extends Session> {
     adminJob.setYesterday(dateMin);
     adminJob.setToday(dateMax);
 
-    List<User> studentsWhoLoggedInToday =
-        adminJob.findUsersWhoLoggedInSinceYesterday("studentUserDetails");
-    List<User> teachersWhoLoggedInToday =
-        adminJob.findUsersWhoLoggedInSinceYesterday("teacherUserDetails");
+    List<User> studentsWhoLoggedInToday = adminJob
+        .findUsersWhoLoggedInSinceYesterday("studentUserDetails");
+    List<User> teachersWhoLoggedInToday = adminJob
+        .findUsersWhoLoggedInSinceYesterday("teacherUserDetails");
     if (studentsWhoLoggedInToday != null && teachersWhoLoggedInToday != null) {
       modelAndView.addObject("numUsersWhoLoggedInToday",
-          studentsWhoLoggedInToday.size()+teachersWhoLoggedInToday.size());
+          studentsWhoLoggedInToday.size() + teachersWhoLoggedInToday.size());
     } else {
       modelAndView.addObject("numUsersWhoLoggedInToday", 0);
     }
@@ -111,12 +111,12 @@ public class AdminIndexController<S extends Session> {
   private void removeExpiredUserSessions() {
     Set<String> loggedInUsernames = sessionService.getLoggedInStudents();
     loggedInUsernames.addAll(sessionService.getLoggedInTeachers());
-    SpringSessionBackedSessionRegistry<S> sessionRegistry =
-        new SpringSessionBackedSessionRegistry<>(this.sessionRepository);
+    SpringSessionBackedSessionRegistry<S> sessionRegistry = new SpringSessionBackedSessionRegistry<>(
+        this.sessionRepository);
     for (String loggedInUsername : loggedInUsernames) {
       UserDetails loggedInUserDetails = userDetailsService.loadUserByUsername(loggedInUsername);
-      List<SessionInformation> sessions =
-          sessionRegistry.getAllSessions(loggedInUserDetails, false);
+      List<SessionInformation> sessions = sessionRegistry.getAllSessions(loggedInUserDetails,
+          false);
       if (sessions.size() == 0) {
         sessionService.removeUser(loggedInUserDetails);
       }
