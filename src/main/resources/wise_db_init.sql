@@ -160,10 +160,11 @@ create table groups_related_to_users
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-create table newsitem (
-    id integer not null auto_increment,
-    date datetime not null,
-    news text not null,
+create table newsitem
+(
+    id    integer      not null auto_increment,
+    date  datetime     not null,
+    news  text         not null,
     title varchar(255) not null,
     type  varchar(255) not null,
     owner bigint       not null,
@@ -379,8 +380,9 @@ create table runs (
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-create table runs_related_to_groups (
-    runs_fk bigint not null,
+create table runs_related_to_groups
+(
+    runs_fk   bigint not null,
     groups_fk bigint not null,
     constraint runs_related_to_groupsGroupsFK foreign key (groups_fk) references `groups` (id),
     constraint runs_related_to_groupsRunsFK foreign key (runs_fk) references runs (id),
@@ -568,9 +570,10 @@ create table user_details_related_to_roles
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-create table users (
-    id bigint not null auto_increment,
-    OPTLOCK integer,
+create table users
+(
+    id              bigint not null auto_increment,
+    OPTLOCK         integer,
     user_details_fk bigint not null,
     constraint usersUserDetailsFK foreign key (user_details_fk) references user_details (id),
     constraint usersUserDetailsUnique unique (user_details_fk),
@@ -578,10 +581,11 @@ create table users (
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
-create table workgroups (
-    id bigint not null auto_increment,
-    OPTLOCK integer,
-    group_fk bigint not null,
+create table workgroups
+(
+    id                 bigint not null auto_increment,
+    OPTLOCK            integer,
+    group_fk           bigint not null,
     period bigint,
     isTeacherWorkgroup bit,
     run_fk bigint not null,
