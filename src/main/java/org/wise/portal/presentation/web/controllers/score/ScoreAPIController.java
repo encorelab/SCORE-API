@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/score")
 public class ScoreAPIController {
 
-  @GetMapping(value = {"/teachingassistant", "/teachingassistant/**"})
+  @GetMapping(value = { "/teachingassistant", "/teachingassistant/**" })
   protected String showTeachingAssistant() {
-    return "forward:/score/teachingassistant/dist/index.html";
+    return "forward:/teachingassistant/dist/index.html";
   }
 }

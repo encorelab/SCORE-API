@@ -89,8 +89,8 @@ public class WebSecurityConfig<S extends Session> extends WebSecurityConfigurerA
         .antMatchers("/student/account/info").hasAnyRole("TEACHER").antMatchers("/student/**")
         .hasAnyRole("STUDENT").antMatchers("/studentStatus").hasAnyRole("TEACHER", "STUDENT")
         .antMatchers("/teacher/**").hasAnyRole("TEACHER").antMatchers("/sso/discourse")
-        .hasAnyRole("TEACHER", "STUDENT").antMatchers("/api/**").permitAll().antMatchers("/")
-        .permitAll();
+        .hasAnyRole("TEACHER", "STUDENT").antMatchers("/score/**/**").permitAll()
+        .antMatchers("/api/**").permitAll().antMatchers("/").permitAll();
     http.formLogin().loginPage("/login").permitAll();
     http.logout().addLogoutHandler(wiseLogoutHandler())
         .logoutRequestMatcher(new AntPathRequestMatcher("/api/logout"));
