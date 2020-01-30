@@ -83,6 +83,9 @@ public class WebConfig implements WebMvcConfigurer {
     registry.addResourceHandler("/portal/themes/**").addResourceLocations("/portal/themes/");
     registry.addResourceHandler("/portal/translate/**").addResourceLocations("/portal/translate/");
     registry.addResourceHandler("/vle/**").addResourceLocations("/vle/");
+    registry.addResourceHandler("/wise5/**").addResourceLocations("/wise5/");
+    registry.addResourceHandler("/score/**").addResourceLocations("/score/");
+    registry.addResourceHandler("/site/**").addResourceLocations("/site/");
     registry.addResourceHandler("/curriculum/**").addResourceLocations("/curriculum/");
     registry.addResourceHandler("/studentuploads/**").addResourceLocations("/studentuploads/");
     registry.addResourceHandler("/projectIcons/**").addResourceLocations("/projectIcons/");
