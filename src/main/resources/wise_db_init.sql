@@ -608,6 +608,7 @@ CREATE TABLE tasks
     endTime       datetime     DEFAULT NULL,
     complete      tinyint(1)   DEFAULT NULL,
     workgroupName varchar(255) DEFAULT NULL,
+    duration bigint(20) DEFAULT NULL,
     PRIMARY KEY (id)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 11
