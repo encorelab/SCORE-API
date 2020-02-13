@@ -236,6 +236,7 @@ public class StudentPostDataController {
                 // updated
                 annotation.convertToClientAnnotation();
                 broadcastAnnotationToTeacher(annotation);
+                broadcastAnnotationToClassroom(annotation);
               } else {
                 annotation = vleService.saveAnnotation(
                     annotationJSONObject.isNull("id") ? null : annotationJSONObject.getInt("id"),
@@ -371,6 +372,15 @@ public class StudentPostDataController {
     JSONObject message = new JSONObject();
     message.put("type", "annotationToTeacher");
     message.put("topic", String.format("/topic/teacher/%s", annotation.getRunId()));
+    message.put("annotation", annotation.toJSON());
+    redisPublisher.publish(message.toString());
+  }
+
+  public void broadcastAnnotationToClassroom(Annotation annotation) throws JSONException {
+    JSONObject message = new JSONObject();
+    message.put("type", "annotationToClassroom");
+    message.put("topic",
+        String.format("/topic/classroom/%s/%s", annotation.getRunId(), annotation.getPeriodId()));
     message.put("annotation", annotation.toJSON());
     redisPublisher.publish(message.toString());
   }
