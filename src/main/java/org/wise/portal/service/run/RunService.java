@@ -33,7 +33,6 @@ import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.wise.portal.dao.ObjectNotFoundException;
-import org.wise.portal.domain.group.Group;
 import org.wise.portal.domain.impl.AddSharedTeacherParameters;
 import org.wise.portal.domain.run.Run;
 import org.wise.portal.domain.run.impl.RunParameters;
@@ -59,8 +58,9 @@ public interface RunService {
    */
   Run createRun(RunParameters runParameters) throws ObjectNotFoundException;
 
-  Run createRun(Long projectId, User user, Set<String> periodNames, Integer maxStudentsPerTeam,
-      Long startDate, Long endDate, Boolean isLockedAfterEndDate, Locale locale) throws Exception;
+  Run createRun(Long projectId, User user, Set<String> periodNames,
+      boolean isRandomPeriodAssignment, Integer maxStudentsPerTeam, Long startDate, Long endDate,
+      boolean isLockedAfterEndDate, Locale locale) throws Exception;
 
   /**
    * Ends this run. The side effect is that the run's endtime gets set. A Run that has ended is no
@@ -477,4 +477,6 @@ public interface RunService {
 
   JSONObject transferRunOwnership(Long runId, String teacherUsername)
       throws ObjectNotFoundException;
+
+  void setRandomPeriodAssignment(Run run, boolean isRandomPeriodAssignment);
 }

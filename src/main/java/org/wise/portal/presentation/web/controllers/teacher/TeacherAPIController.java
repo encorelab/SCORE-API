@@ -94,7 +94,7 @@ public class TeacherAPIController extends UserAPIController {
   @GetMapping("/workgroup/{runId}")
   List<HashMap<String, Object>> getWorkgroups(Authentication auth, @PathVariable Long runId)
       throws ObjectNotFoundException {
-    List<HashMap<String, Object>> workgroups = new ArrayList<HashMap<String, Object>> ();
+    List<HashMap<String, Object>> workgroups = new ArrayList<HashMap<String, Object>>();
     for (Workgroup workgroupInRun : runService.getWorkgroups(runId)) {
       HashMap<String, Object> workgroup = new HashMap<String, Object>();
       workgroup.put("id", workgroupInRun.getId());
@@ -125,6 +125,7 @@ public class TeacherAPIController extends UserAPIController {
     }
     map.put("periods", periods);
     map.put("lastRun", run.getLastRun());
+    map.put("isRandomPeriodAssignment", run.isRandomPeriodAssignment());
     return map;
   }
 
@@ -269,6 +270,7 @@ public class TeacherAPIController extends UserAPIController {
   @PostMapping("/run/create")
   HashMap<String, Object> createRun(Authentication auth, HttpServletRequest request,
       @RequestParam("projectId") Long projectId, @RequestParam("periods") String periods,
+      @RequestParam("isRandomPeriodAssignment") boolean isRandomPeriodAssignment,
       @RequestParam("maxStudentsPerTeam") Integer maxStudentsPerTeam,
       @RequestParam("startDate") Long startDate,
       @RequestParam(value = "endDate", required = false) Long endDate,
@@ -277,8 +279,8 @@ public class TeacherAPIController extends UserAPIController {
     User user = userService.retrieveUserByUsername(auth.getName());
     Locale locale = request.getLocale();
     Set<String> periodNames = createPeriodNamesSet(periods);
-    Run run = runService.createRun(projectId, user, periodNames, maxStudentsPerTeam, startDate,
-        endDate, isLockedAfterEndDate, locale);
+    Run run = runService.createRun(projectId, user, periodNames, isRandomPeriodAssignment,
+        maxStudentsPerTeam, startDate, endDate, isLockedAfterEndDate, locale);
     return getRunMap(user, run);
   }
 
@@ -426,6 +428,25 @@ public class TeacherAPIController extends UserAPIController {
     } else {
       response.put("status", "error");
       response.put("messageCode", "noPermissionToChangeDate");
+    }
+    return response;
+  }
+
+  @PostMapping("/run/update/random-period-assignment")
+  HashMap<String, Object> updateRandomPeriodAssignment(Authentication authentication,
+      @RequestParam("runId") Long runId,
+      @RequestParam("isRandomPeriodAssignment") boolean isRandomPeriodAssignment)
+      throws ObjectNotFoundException {
+    User user = userService.retrieveUserByUsername(authentication.getName());
+    Run run = runService.retrieveById(runId);
+    HashMap<String, Object> response = new HashMap<String, Object>();
+    if (run.isTeacherAssociatedToThisRun(user)) {
+      runService.setRandomPeriodAssignment(run, isRandomPeriodAssignment);
+      response.put("status", "success");
+      response.put("run", getRunMap(user, run));
+    } else {
+      response.put("status", "error");
+      response.put("messageCode", "noPermissionToChangeRandomPeriodAssignment");
     }
     return response;
   }
