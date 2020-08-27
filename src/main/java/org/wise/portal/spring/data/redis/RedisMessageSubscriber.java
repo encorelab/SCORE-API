@@ -48,9 +48,6 @@ public class RedisMessageSubscriber implements MessageListener {
       case "unpause":
         createAndSendWebSocketMessage("unpause", messageJSON);
         break;
-      case "project":
-        createAndSendWebSocketMessage("project", messageJSON, "project");
-        break;
       case "node":
         createAndSendWebSocketMessage("node", messageJSON, "node");
         break;
