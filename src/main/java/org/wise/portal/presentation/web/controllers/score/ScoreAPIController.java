@@ -1,12 +1,11 @@
 package org.wise.portal.presentation.web.controllers.score;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Controller for single-page SCORE app built with Angular
@@ -25,9 +24,4 @@ public class ScoreAPIController {
   protected String showTeachingAssistant(HttpServletRequest request, HttpServletResponse response) {
     return "forward:/score/teachingassistant/dist/index.html";
   }
-
-  
-
-  
-
-  
+}
