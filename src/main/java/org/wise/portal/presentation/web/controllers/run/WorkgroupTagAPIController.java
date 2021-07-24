@@ -1,5 +1,6 @@
 package org.wise.portal.presentation.web.controllers.run;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -75,7 +76,8 @@ public class WorkgroupTagAPIController {
 
   @Secured("ROLE_TEACHER")
   @PostMapping("/run/{runId}/delete")
-  void deleteTag(@PathVariable Long runId, @RequestBody TagImpl tag, Authentication auth) {
+  void deleteTag(@PathVariable Long runId, @RequestBody TagImpl tag, Authentication auth)
+      throws JsonProcessingException, ObjectNotFoundException, JSONException {
     if (tagService.canEditTag(auth, tag)) {
       tagService.deleteTag(auth, tag);
     } else {
@@ -103,6 +105,19 @@ public class WorkgroupTagAPIController {
       return workgroup.getTags();
     }
     throw new AccessDeniedException("Not permitted");
+  }
+
+  @GetMapping("/{tagId}/workgroups")
+  Set<Workgroup> getWorkgroupsWithTag(@PathVariable Integer tagId, Authentication auth)
+      throws ObjectNotFoundException, JsonProcessingException {
+    Tag tag = tagService.getTagById(tagId);
+    Set<Workgroup> workgroupsWithTag = new HashSet<Workgroup>();
+    for (Workgroup workgroup : runService.getWorkgroups(tag.getRun().getId())) {
+      if (workgroup.getTags().contains(tag)) {
+        workgroupsWithTag.add(workgroup);
+      }
+    }
+    return workgroupsWithTag;
   }
 
   @PostMapping("/workgroup/{workgroupId}/add")
