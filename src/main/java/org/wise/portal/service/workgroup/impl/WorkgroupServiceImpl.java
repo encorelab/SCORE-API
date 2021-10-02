@@ -240,12 +240,14 @@ public class WorkgroupServiceImpl implements WorkgroupService {
     workgroupDao.save(workgroup);
   }
 
+  @Transactional()
   public void addTag(Workgroup workgroup, Tag tag) {
     workgroup.addTag(tag);
     workgroupDao.save(workgroup);
   }
 
   @Override
+  @Transactional()
   public void removeTag(Workgroup workgroup, Tag tag) {
     workgroup.getTags().removeIf(existingTag -> (existingTag.getId().equals(tag.getId())));
     workgroupDao.save(workgroup);
