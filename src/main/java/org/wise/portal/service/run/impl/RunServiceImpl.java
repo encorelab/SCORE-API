@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -807,4 +806,7 @@ public class RunServiceImpl implements RunService {
     runDao.save(run);
   }
 
+  public boolean isUserInRunAndPeriod(User user, Run run, Group period) {
+    return runDao.isUserInRunAndPeriod(user, run, period);
+  }
 }
