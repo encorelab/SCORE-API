@@ -22,15 +22,14 @@ import org.wise.portal.domain.authentication.impl.StudentUserDetails;
 import org.wise.portal.domain.authentication.impl.TeacherUserDetails;
 import org.wise.portal.domain.group.Group;
 import org.wise.portal.domain.group.impl.PersistentGroup;
-import org.wise.portal.domain.project.Project;
 import org.wise.portal.domain.project.impl.ProjectImpl;
 import org.wise.portal.domain.run.Run;
 import org.wise.portal.domain.run.impl.RunImpl;
 import org.wise.portal.domain.user.User;
 import org.wise.portal.domain.user.impl.UserImpl;
-import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.portal.domain.workgroup.impl.WorkgroupImpl;
 import org.wise.portal.service.authentication.UserDetailsService;
+import org.wise.portal.service.group.GroupService;
 import org.wise.portal.service.portal.PortalService;
 import org.wise.portal.service.project.ProjectService;
 import org.wise.portal.service.run.RunService;
@@ -38,13 +37,19 @@ import org.wise.portal.service.user.UserService;
 import org.wise.portal.service.vle.wise5.VLEService;
 import org.wise.portal.service.workgroup.WorkgroupService;
 
-public class APIControllerTest {
+public abstract class APIControllerTest {
 
   protected final String STUDENT_FIRSTNAME = "SpongeBob";
 
   protected final String STUDENT_LASTNAME = "Squarepants";
 
   protected final String STUDENT_USERNAME = "SpongeBobS0101";
+
+  protected final String STUDENT2_FIRSTNAME = "Patrick";
+
+  protected final String STUDENT2_LASTNAME = "Starr";
+
+  protected final String STUDENT2_USERNAME = "PatrickS0101";
 
   protected final String STUDENT_PASSWORD = "studentPass";
 
@@ -64,13 +69,15 @@ public class APIControllerTest {
 
   protected Long student1Id = 94678L;
 
+  protected Long student2Id = 94679L;
+
   protected Long teacher1Id = 94210L;
 
-  protected User student1, teacher1, teacher2, admin1;
+  protected User student1, student2, teacher1, teacher2, admin1;
 
   protected Authentication studentAuth, teacherAuth, adminAuth;
 
-  protected StudentUserDetails student1UserDetails;
+  protected StudentUserDetails student1UserDetails, student2UserDetails;
 
   protected TeacherUserDetails teacher1UserDetails, admin1UserDetails;
 
@@ -88,20 +95,27 @@ public class APIControllerTest {
 
   protected String RUN1_PERIOD2_NAME = "2";
 
-  protected Run run1, run2, run3;
+  protected RunImpl run1, run2, run3;
 
   protected List<Run> runs;
 
   protected List<Tag> run1Tags;
 
-  protected Workgroup workgroup1, teacher1Run1Workgroup;
+  protected WorkgroupImpl workgroup1, workgroup2, teacher1Run1Workgroup;
 
-  protected Project project1, project2, project3;
+  protected ProjectImpl project1, project2, project3;
 
-  protected Group run1Period1, run1Period2;
+  protected Group run1Period1, run1Period2, run2Period2, run3Period4;
+
+  protected Long run1Period1Id = 1L;
+
+  protected Long run1Period2Id = 2L;
 
   @Mock
   protected HttpServletRequest request;
+
+  @Mock
+  protected GroupService groupService;
 
   @Mock
   protected UserService userService;
@@ -139,6 +153,18 @@ public class APIControllerTest {
     student1UserDetails.setAuthorities(new GrantedAuthority[] { studentAuthority });
     student1UserDetails.setGoogleUserId(STUDENT1_GOOGLE_ID);
     student1.setUserDetails(student1UserDetails);
+    student2 = new UserImpl();
+    student2.setId(student2Id);
+    PersistentGrantedAuthority studentAuthority2 = new PersistentGrantedAuthority();
+    studentAuthority2.setAuthority(UserDetailsService.STUDENT_ROLE);
+    student2UserDetails = new StudentUserDetails();
+    student2UserDetails.setFirstname(STUDENT2_FIRSTNAME);
+    student2UserDetails.setLastname(STUDENT2_LASTNAME);
+    student2UserDetails.setUsername(STUDENT2_USERNAME);
+    student2UserDetails.setGender(Gender.FEMALE);
+    student2UserDetails.setNumberOfLogins(10);
+    student2UserDetails.setAuthorities(new GrantedAuthority[] { studentAuthority2 });
+    student2.setUserDetails(student2UserDetails);
     Object credentials = null;
     studentAuth = new TestingAuthenticationToken(student1UserDetails, credentials);
     teacher1 = new UserImpl();
@@ -170,10 +196,12 @@ public class APIControllerTest {
     run1.setRuncode(RUN1_RUNCODE);
     HashSet<Group> run1Periods = new HashSet<Group>();
     run1Period1 = new PersistentGroup();
+    run1Period1.setId(run1Period1Id);
     run1Period1.setName(RUN1_PERIOD1_NAME);
     run1Period1.addMember(student1);
     run1Periods.add(run1Period1);
     run1Period2 = new PersistentGroup();
+    run1Period2.setId(run1Period2Id);
     run1Period2.setName(RUN1_PERIOD2_NAME);
     run1Periods.add(run1Period2);
     run1.setPeriods(run1Periods);
@@ -189,6 +217,10 @@ public class APIControllerTest {
     workgroup1.addMember(student1);
     workgroup1.setPeriod(run1Period1);
     workgroup1.setRun(run1);
+    workgroup2 = new WorkgroupImpl();
+    workgroup2.addMember(student2);
+    workgroup2.setPeriod(run1Period1);
+    workgroup2.setRun(run1);
     teacher1Run1Workgroup = new WorkgroupImpl();
     teacher1Run1Workgroup.addMember(teacher1);
     teacher1Run1Workgroup.setRun(run1);
@@ -202,7 +234,7 @@ public class APIControllerTest {
     run2.setOwner(teacher1);
     run2.setStarttime(new Date());
     HashSet<Group> run2Periods = new HashSet<Group>();
-    Group run2Period2 = new PersistentGroup();
+    run2Period2 = new PersistentGroup();
     run2Period2.setName("2");
     run2Period2.addMember(student1);
     run2Periods.add(run2Period2);
@@ -216,7 +248,7 @@ public class APIControllerTest {
     run3.setOwner(teacher2);
     run3.setStarttime(new Date());
     HashSet<Group> run3Periods = new HashSet<Group>();
-    Group run3Period4 = new PersistentGroup();
+    run3Period4 = new PersistentGroup();
     run3Period4.setName("4");
     run3Period4.addMember(student1);
     run3Periods.add(run3Period4);
@@ -233,6 +265,7 @@ public class APIControllerTest {
   @After
   public void tearDown() {
     student1 = null;
+    student2 = null;
     teacher1 = null;
     teacher2 = null;
     run1 = null;

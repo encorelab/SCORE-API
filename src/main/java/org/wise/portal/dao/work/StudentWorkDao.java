@@ -34,6 +34,7 @@ import java.util.List;
 
 /**
  * Domain Access Object for StudentWork
+ * 
  * @author Hiroki Terashima
  */
 public interface StudentWorkDao<T extends StudentWork> extends SimpleDao<T> {
@@ -41,4 +42,8 @@ public interface StudentWorkDao<T extends StudentWork> extends SimpleDao<T> {
   List<StudentWork> getStudentWorkListByParams(Integer id, Run run, Group period,
       Workgroup workgroup, Boolean isAutoSave, Boolean isSubmit, String nodeId, String componentId,
       String componentType, List<JSONObject> components);
+
+  List<StudentWork> getStudentWork(Run run, String nodeId, String componentId);
+
+  List<StudentWork> getStudentWork(Run run, Group period, String nodeId, String componentId);
 }
