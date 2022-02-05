@@ -17,6 +17,10 @@ public abstract class AbstractClassmateDataControllerTest extends APIControllerT
   String COMPONENT_ID1 = "component1";
   String NODE_ID1 = "node1";
   String OPEN_RESPONSE_TYPE = "OpenResponse";
+  String OTHER_COMPONENT_ID = "component2";
+  String OTHER_COMPONENT_ID_NOT_ALLOWED = "component3";
+  String OTHER_NODE_ID = "node2";
+  String OTHER_NODE_ID_NOT_ALLOWED = "node3";
   String SHOULD_NOT_HAVE_THROWN_EXCEPTION = "Should not have thrown an exception";
 
   protected void expectStudentWork(List<StudentWork> studentWork) {
@@ -49,7 +53,6 @@ public abstract class AbstractClassmateDataControllerTest extends APIControllerT
 
   protected void expectIsUserInRun(boolean isInRun)
       throws NoSuchMethodException, ObjectNotFoundException {
-    expect(runService.retrieveById(runId1)).andReturn(run1);
     expect(groupService.retrieveById(run1Period1Id)).andReturn(run1Period1);
     expect(userService.retrieveUser(student1UserDetails)).andReturn(student1);
     expect(runService.isUserInRunAndPeriod(student1, run1, run1Period1)).andReturn(isInRun);

@@ -201,6 +201,12 @@ public abstract class AbstractTransactionalDbTests
     return createWorkgroup(members, run, period);
   }
 
+  public void addPeriodToRun(Group period, Run run) {
+    Set<Group> periods = run.getPeriods();
+    periods.add(period);
+    run.setPeriods(periods);
+  }
+
   public Date getDateXDaysFromNow(int x) {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.DATE, x);

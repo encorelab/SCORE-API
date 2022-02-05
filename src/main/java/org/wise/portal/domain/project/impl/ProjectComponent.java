@@ -23,6 +23,7 @@
  */
 package org.wise.portal.domain.project.impl;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,7 +32,6 @@ import lombok.Getter;
 /**
  * ProjectComponent defines activities that students work on, like MultipleChoice, OpenResponse,
  * etc.
- *
  * @author Hiroki Terashima
  */
 public class ProjectComponent {
@@ -52,5 +52,9 @@ public class ProjectComponent {
 
   public int getInt(String key) throws JSONException {
     return this.componentJSON.getInt(key);
+  }
+
+  public JSONArray getJSONArray(String key) throws JSONException {
+    return this.componentJSON.getJSONArray(key);
   }
 }

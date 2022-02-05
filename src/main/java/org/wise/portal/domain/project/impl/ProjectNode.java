@@ -30,7 +30,6 @@ import org.json.JSONObject;
 /**
  * ProjectNode stores a list of <code>ProjectComponent</code> and is used to organize the structure
  * of a Project's content.
- *
  * @author Hiroki Terashima
  */
 public class ProjectNode {

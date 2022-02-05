@@ -15,6 +15,7 @@ import org.wise.portal.dao.ObjectNotFoundException;
 import org.wise.portal.domain.group.Group;
 import org.wise.portal.domain.project.impl.ProjectComponent;
 import org.wise.portal.domain.run.Run;
+import org.wise.portal.domain.run.impl.RunImpl;
 import org.wise.vle.domain.annotation.wise5.Annotation;
 import org.wise.vle.domain.work.StudentWork;
 
@@ -28,16 +29,16 @@ public class ClassmateSummaryDataController extends ClassmateDataController {
   final String SUMMARY_TYPE = "Summary";
 
   @GetMapping("/student-work/{runId}/{periodId}/{nodeId}/{componentId}/{otherNodeId}/{otherComponentId}/{source}")
-  public List<StudentWork> getClassmateSummaryWork(Authentication auth, @PathVariable Long runId,
-      @PathVariable Long periodId, @PathVariable String nodeId, @PathVariable String componentId,
-      @PathVariable String otherNodeId, @PathVariable String otherComponentId,
-      @PathVariable String source) throws IOException, JSONException, ObjectNotFoundException {
-    Run run = runService.retrieveById(runId);
+  public List<StudentWork> getClassmateSummaryWork(Authentication auth,
+      @PathVariable("runId") RunImpl run, @PathVariable Long periodId, @PathVariable String nodeId,
+      @PathVariable String componentId, @PathVariable String otherNodeId,
+      @PathVariable String otherComponentId, @PathVariable String source)
+      throws IOException, JSONException, ObjectNotFoundException {
     Group period = groupService.retrieveById(periodId);
     if (isAllowedToGetData(auth, run, period, nodeId, componentId, otherNodeId, otherComponentId)) {
-      if (PERIOD_SOURCE.equals(source)) {
+      if (source.equals(PERIOD_SOURCE)) {
         return getStudentWork(run, period, otherNodeId, otherComponentId);
-      } else if (ALL_PERIODS_SOURCE.equals(source)) {
+      } else if (source.equals(ALL_PERIODS_SOURCE)) {
         return getStudentWork(run, otherNodeId, otherComponentId);
       }
     }
@@ -46,16 +47,15 @@ public class ClassmateSummaryDataController extends ClassmateDataController {
 
   @GetMapping("/annotations/{runId}/{periodId}/{nodeId}/{componentId}/{otherNodeId}/{otherComponentId}/{source}")
   public List<Annotation> getClassmateSummaryAnnotations(Authentication auth,
-      @PathVariable Long runId, @PathVariable Long periodId, @PathVariable String nodeId,
+      @PathVariable("runId") RunImpl run, @PathVariable Long periodId, @PathVariable String nodeId,
       @PathVariable String componentId, @PathVariable String otherNodeId,
       @PathVariable String otherComponentId, @PathVariable String source)
       throws IOException, JSONException, ObjectNotFoundException {
-    Run run = runService.retrieveById(runId);
     Group period = groupService.retrieveById(periodId);
     if (isAllowedToGetData(auth, run, period, nodeId, componentId, otherNodeId, otherComponentId)) {
-      if (PERIOD_SOURCE.equals(source)) {
+      if (source.equals(PERIOD_SOURCE)) {
         return getAnnotations(run, period, otherNodeId, otherComponentId);
-      } else if (ALL_PERIODS_SOURCE.equals(source)) {
+      } else if (source.equals(ALL_PERIODS_SOURCE)) {
         return getAnnotations(run, otherNodeId, otherComponentId);
       }
     }
@@ -73,8 +73,8 @@ public class ClassmateSummaryDataController extends ClassmateDataController {
       String otherNodeId, String otherComponentId)
       throws IOException, JSONException, ObjectNotFoundException {
     ProjectComponent projectComponent = getProjectComponent(run, nodeId, componentId);
-    return SUMMARY_TYPE.equals(projectComponent.getString("type"))
-        && otherNodeId.equals(projectComponent.getString("summaryNodeId"))
-        && otherComponentId.equals(projectComponent.getString("summaryComponentId"));
+    return projectComponent.getString("type").equals(SUMMARY_TYPE)
+        && projectComponent.getString("summaryNodeId").equals(otherNodeId)
+        && projectComponent.getString("summaryComponentId").equals(otherComponentId);
   }
 }
