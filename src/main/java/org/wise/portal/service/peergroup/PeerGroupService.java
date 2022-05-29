@@ -28,7 +28,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.wise.portal.dao.ObjectNotFoundException;
 import org.wise.portal.domain.peergroup.PeerGroup;
-import org.wise.portal.domain.peergroupactivity.PeerGroupActivity;
+import org.wise.portal.domain.peergrouping.PeerGrouping;
 import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.vle.domain.work.StudentWork;
 
@@ -46,36 +46,29 @@ public interface PeerGroupService {
   public PeerGroup getById(Long id) throws ObjectNotFoundException;
 
   /**
-   * Gets a PeerGroup for the specified workgroup and PeerGroupActivity if a PeerGroup
+   * Gets a PeerGroup for the specified workgroup and PeerGrouping if a PeerGroup
    * does not exist, create one.
    *
    * @param workgroup Workgroup to get/create the PeerGroup for
-   * @param activity PeerGroupActivity to get/create the PeerGroup for
-   * @return PeerGroup for the specified workgroup and PeerGroupActivity
-   * @throws PeerGroupActivityThresholdNotSatisfiedException the PeerGroup cannot be created due to
-   * threshold not being met
+   * @param peerGrouping PeerGrouping to get/create the PeerGroup for
+   * @return PeerGroup for the specified workgroup and PeerGrouping
    * @throws PeerGroupCreationException the PeerGroup cannot be created for other reasons
    * like an error occurred while grouping members
    */
-  PeerGroup getPeerGroup(Workgroup workgroup, PeerGroupActivity activity) throws JSONException,
-      PeerGroupActivityThresholdNotSatisfiedException, PeerGroupCreationException;
+  PeerGroup getPeerGroup(Workgroup workgroup, PeerGrouping peerGrouping) throws JSONException,
+      PeerGroupCreationException;
 
   /**
-   * Gets all the PeerGroups for the specified PeerGroupActivity
-   * @param activity PeerGroupActivity the PeerGroups works on
-   * @return PeerGroups that work on the specified activity
+   * Gets all the PeerGroups for the specified PeerGrouping
+   * @param peerGrouping PeerGrouping the PeerGroups works on
+   * @return PeerGroups that work on the specified PeerGrouping
    */
-  List<PeerGroup> getPeerGroups(PeerGroupActivity activity);
+  List<PeerGroup> getPeerGroups(PeerGrouping peerGrouping);
 
   /**
-   * Gets StudentWork for the PeerGroup's activity from all the members in the PeerGroup
+   * Gets StudentWork for the component from all the members in the PeerGroup
    * @param peerGroup group of workgroups in the PeerGroup
-   * @return List of StudentWork by members in the PeerGroup for the activity
+   * @return List of StudentWork by members in the PeerGroup for the component
    */
-  public List<StudentWork> getStudentWork(PeerGroup peerGroup);
-
   public List<StudentWork> getStudentWork(PeerGroup peerGroup, String nodeId, String componentId);
-
-  public List<StudentWork> getLatestStudentWork(PeerGroup peerGroup, String nodeId,
-      String componentId);
 }

@@ -25,7 +25,7 @@ package org.wise.portal.domain.peergroup;
 
 import java.util.Set;
 
-import org.wise.portal.domain.peergroupactivity.PeerGroupActivity;
+import org.wise.portal.domain.peergrouping.PeerGrouping;
 import org.wise.portal.domain.user.User;
 import org.wise.portal.domain.workgroup.Workgroup;
 
@@ -35,7 +35,11 @@ import org.wise.portal.domain.workgroup.Workgroup;
  */
 public interface PeerGroup {
 
-  PeerGroupActivity getPeerGroupActivity();
+  PeerGrouping getPeerGrouping();
+
+  void setPeerGrouping(PeerGrouping peerGrouping);
+
+  Long getId();
 
   Set<Workgroup> getMembers();
 

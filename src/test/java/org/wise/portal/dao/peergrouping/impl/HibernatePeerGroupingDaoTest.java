@@ -21,7 +21,7 @@
  * ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
  * REGENTS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.wise.portal.dao.peergroupactivity.impl;
+package org.wise.portal.dao.peergrouping.impl;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -34,49 +34,40 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.wise.portal.dao.Component;
 import org.wise.portal.dao.WISEHibernateTest;
-import org.wise.portal.domain.peergroupactivity.impl.PeerGroupActivityImpl;
+import org.wise.portal.domain.peergrouping.impl.PeerGroupingImpl;
 import org.wise.portal.domain.run.Run;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class HibernatePeerGroupActivityDaoTest extends WISEHibernateTest {
+public class HibernatePeerGroupingDaoTest extends WISEHibernateTest {
 
   @Autowired
-  HibernatePeerGroupActivityDao peerGroupActivityDao;
+  HibernatePeerGroupingDao peerGroupingDao;
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
-    createPeerGroupActivityWithComponent(component1);
-    createPeerGroupActivityWithTag(run1, peerGroupActivityTag1);
-  }
-
-  @Test
-  public void getByComponent() {
-    assertNotNull(peerGroupActivityDao.getByComponent(component1.run, component1.nodeId,
-        component1.componentId));
-    assertNull(peerGroupActivityDao.getByComponent(componentNotExists.run,
-        componentNotExists.nodeId, componentNotExists.componentId));
+    createPeerGroupingWithComponent(component1);
+    createPeerGroupingWithTag(run1, peerGroupingTag1);
   }
 
   @Test
   public void getByTag() {
-    assertNotNull(peerGroupActivityDao.getByTag(run1, peerGroupActivityTag1));
-    assertNull(peerGroupActivityDao.getByTag(run1, "tagNotInDB"));
+    assertNotNull(peerGroupingDao.getByTag(run1, peerGroupingTag1));
+    assertNull(peerGroupingDao.getByTag(run1, "tagNotInDB"));
   }
 
-  private void createPeerGroupActivityWithComponent(Component component) {
-    PeerGroupActivityImpl peerGroupActivity = new PeerGroupActivityImpl();
-    peerGroupActivity.setRun(component.run);
-    peerGroupActivity.setNodeId(component.nodeId);
-    peerGroupActivity.setComponentId(component.componentId);
-    peerGroupActivityDao.save(peerGroupActivity);
+  private void createPeerGroupingWithComponent(Component component) {
+    PeerGroupingImpl peerGrouping = new PeerGroupingImpl();
+    peerGrouping.setRun(component.run);
+    peerGrouping.setTag("tag1");
+    peerGroupingDao.save(peerGrouping);
   }
 
-  private void createPeerGroupActivityWithTag(Run run, String peerGroupActivityTag) {
-    PeerGroupActivityImpl peerGroupActivity = new PeerGroupActivityImpl();
-    peerGroupActivity.setRun(run);
-    peerGroupActivity.setTag(peerGroupActivityTag);
-    peerGroupActivityDao.save(peerGroupActivity);
+  private void createPeerGroupingWithTag(Run run, String peerGroupingTag) {
+    PeerGroupingImpl peerGrouping = new PeerGroupingImpl();
+    peerGrouping.setRun(run);
+    peerGrouping.setTag(peerGroupingTag);
+    peerGroupingDao.save(peerGrouping);
   }
 }

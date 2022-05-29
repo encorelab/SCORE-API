@@ -23,8 +23,8 @@
  */
 package org.wise.portal.domain.project.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,30 +58,24 @@ public class ProjectContent {
     return node != null ? node.getComponent(componentId) : null;
   }
 
-  public Set<String> getPeerGroupActivityTags() throws JSONException {
-    Set<String> tags = new HashSet<String>();
-    JSONArray components = getComponents();
-    for (int j = 0; j < components.length(); j++) {
-      JSONObject component = components.getJSONObject(j);
-      if (component.has("peerGroupActivityTag")) {
-        tags.add(component.getString("peerGroupActivityTag"));
-      }
-    }
-    return tags;
+  public JSONArray getPeerGroupings() {
+    return this.projectJSON.optJSONArray("peerGroupings");
   }
 
-  private JSONArray getComponents() throws JSONException {
-    JSONArray components = new JSONArray();
+  public List<ProjectComponent> getComponents() throws JSONException {
+    List<ProjectComponent> projectComponents = new ArrayList<ProjectComponent>();
     JSONArray nodes = this.projectJSON.getJSONArray("nodes");
-    for (int i = 0; i < nodes.length(); i++) {
-      JSONObject node = nodes.getJSONObject(i);
-      if (node.has("components")) {
-        JSONArray nodeComponents = node.getJSONArray("components");
-        for (int j = 0; j < nodeComponents.length(); j++) {
-          components.put(nodeComponents.get(j));
+    for (int n = 0; n < nodes.length(); n++) {
+      JSONObject node = nodes.getJSONObject(n);
+      if (node.getString("type").equals("node")) {
+        ProjectNode projectNode = new ProjectNode(node);
+        JSONArray components = node.getJSONArray("components");
+        for (int c = 0; c < components.length(); c++) {
+          JSONObject component = components.getJSONObject(c);
+          projectComponents.add(new ProjectComponent(projectNode, component));
         }
       }
     }
-    return components;
+    return projectComponents;
   }
 }

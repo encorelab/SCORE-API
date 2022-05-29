@@ -52,6 +52,7 @@ import org.wise.portal.domain.group.Group;
 import org.wise.portal.domain.run.Run;
 import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.portal.service.group.GroupService;
+import org.wise.portal.service.peergroup.PeerGroupService;
 import org.wise.portal.service.project.ProjectService;
 import org.wise.portal.service.run.RunService;
 import org.wise.portal.service.user.UserService;
@@ -119,6 +120,9 @@ public class VLEServiceImpl implements VLEService {
   @Autowired
   private WorkgroupService workgroupService;
 
+  @Autowired
+  private PeerGroupService peerGroupService;
+
   @Override
   public List<StudentWork> getStudentWorkList(Integer id, Integer runId, Integer periodId,
       Integer workgroupId, Boolean isAutoSave, Boolean isSubmit, String nodeId, String componentId,
@@ -166,6 +170,23 @@ public class VLEServiceImpl implements VLEService {
     return studentWorkDao.getStudentWork(run, period, nodeId, componentId);
   }
 
+  public List<StudentWork> getLatestStudentWork(Run run, String nodeId, String componentId) {
+    return filterLatestStudentWork(getStudentWork(run, nodeId, componentId));
+  }
+
+  public List<StudentWork> getLatestStudentWork(Run run, Group period, String nodeId,
+      String componentId) {
+    return filterLatestStudentWork(getStudentWork(run, period, nodeId, componentId));
+  }
+
+  private List<StudentWork> filterLatestStudentWork(List<StudentWork> allStudentWork) {
+    HashMap<Long, StudentWork> latestStudentWork = new HashMap<Long, StudentWork>();
+    for (StudentWork studentWork : allStudentWork) {
+      latestStudentWork.put(studentWork.getWorkgroup().getId(), studentWork);
+    }
+    return new ArrayList<StudentWork>(latestStudentWork.values());
+  }
+
   private List<StudentWork> filterLatestWorkForEachWorkgroup(List<StudentWork> allStudentWork) {
     HashMap<Long, StudentWork> latestWorkPerWorkgroup = new HashMap<Long, StudentWork>();
     for (StudentWork studentWork : allStudentWork) {
@@ -206,8 +227,8 @@ public class VLEServiceImpl implements VLEService {
 
   @Override
   public StudentWork saveStudentWork(Integer id, Integer runId, Integer periodId,
-      Integer workgroupId, Boolean isAutoSave, Boolean isSubmit, String nodeId, String componentId,
-      String componentType, String studentData, String clientSaveTime) {
+      Integer workgroupId, Long peerGroupId, Boolean isAutoSave, Boolean isSubmit, String nodeId,
+      String componentId, String componentType, String studentData, String clientSaveTime) {
     StudentWork studentWork;
     if (id != null) {
       // if the id is passed in, the client is requesting an update, so fetch the StudentWork from
@@ -239,6 +260,13 @@ public class VLEServiceImpl implements VLEService {
     if (workgroupId != null) {
       try {
         studentWork.setWorkgroup(workgroupService.retrieveById(new Long(workgroupId)));
+      } catch (ObjectNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+    if (peerGroupId != null) {
+      try {
+        studentWork.setPeerGroup(peerGroupService.getById(peerGroupId));
       } catch (ObjectNotFoundException e) {
         e.printStackTrace();
       }
@@ -615,7 +643,7 @@ public class VLEServiceImpl implements VLEService {
   }
 
   @Override
-  public StudentAsset saveStudentAsset(Integer id, Integer runId, Integer periodId,
+  public StudentAsset saveStudentAsset(Integer id, Long runId, Integer periodId,
       Integer workgroupId, String nodeId, String componentId, String componentType,
       Boolean isReferenced, String fileName, String filePath, Long fileSize, String clientSaveTime,
       String clientDeleteTime) throws ObjectNotFoundException {

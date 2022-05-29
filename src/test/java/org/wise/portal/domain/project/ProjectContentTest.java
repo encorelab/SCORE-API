@@ -2,10 +2,6 @@ package org.wise.portal.domain.project;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Set;
 
 import org.easymock.EasyMockRunner;
 import org.json.JSONException;
@@ -24,7 +20,7 @@ public class ProjectContentTest {
       "{\"id\":\"node1\"," +
           "\"components\":[" +
               "{\"id\":\"c1\"}," +
-              "{\"id\":\"c2\", \"peerGroupActivityTag\":\"tag1\"}]}]}";
+              "{\"id\":\"c2\", \"peerGroupingTag\":\"tag1\"}]}]}";
 
   @Before
   public void setup() throws JSONException {
@@ -49,12 +45,5 @@ public class ProjectContentTest {
   @Test
   public void getComponent_ComponentExists_ReturnComponent() throws JSONException {
     assertNotNull(content.getComponent("node1", "c1"));
-  }
-
-  @Test
-  public void getPeerGroupActivityTags_ReturnTags() throws JSONException {
-    Set<String> tags = content.getPeerGroupActivityTags();
-    assertEquals(1, tags.size());
-    assertTrue(tags.contains("tag1"));
   }
 }

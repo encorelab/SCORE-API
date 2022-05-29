@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.security.access.AccessDeniedException;
 import org.wise.portal.dao.ObjectNotFoundException;
+import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.vle.domain.annotation.wise5.Annotation;
 import org.wise.vle.domain.work.StudentWork;
 
@@ -27,37 +29,47 @@ public class ClassmateSummaryDataControllerTest extends AbstractClassmateDataCon
   @Test
   public void getClassmateSummaryWork_NotInRun_ThrowException()
       throws NoSuchMethodException, ObjectNotFoundException {
-    expectIsUserInRun(false);
+    setupStudent2NotInRunAndNotInPeriod();
     replayAll();
     assertThrows(AccessDeniedException.class,
-        () -> controller.getClassmateSummaryWork(studentAuth, run1, run1Period1Id, NODE_ID1,
-            COMPONENT_ID1, OTHER_NODE_ID, OTHER_COMPONENT_ID, controller.PERIOD_SOURCE));
+        () -> controller.getClassmateSummaryWork(studentAuth2, run3, run3Period4Id, OTHER_NODE_ID,
+        OTHER_COMPONENT_ID, controller.PERIOD_SOURCE));
+    verifyAll();
+  }
+
+  @Test
+  public void getClassmateSummaryWork_NotInPeriod_ThrowException()
+      throws NoSuchMethodException, ObjectNotFoundException {
+    setupStudent2InRunButNotInPeriod();
+    replayAll();
+    assertThrows(AccessDeniedException.class,
+        () -> controller.getClassmateSummaryWork(studentAuth2, run1, run1Period2Id, OTHER_NODE_ID,
+        OTHER_COMPONENT_ID, controller.PERIOD_SOURCE));
     verifyAll();
   }
 
   @Test
   public void getClassmateSummaryWork_NotSummaryComponent_ThrowException()
       throws IOException, NoSuchMethodException, ObjectNotFoundException {
-    expectIsUserInRun(true);
+    setupStudent1InRunAndInPeriod();
     expectComponentType(OPEN_RESPONSE_TYPE);
     replayAll();
     assertThrows(AccessDeniedException.class,
-        () -> controller.getClassmateSummaryWork(studentAuth, run1, run1Period1Id, NODE_ID1,
-            COMPONENT_ID1, OTHER_NODE_ID, OTHER_COMPONENT_ID, controller.PERIOD_SOURCE));
+        () -> controller.getClassmateSummaryWork(studentAuth, run1, run1Period1Id, OTHER_NODE_ID,
+        OTHER_COMPONENT_ID, controller.PERIOD_SOURCE));
     verifyAll();
   }
 
   @Test
   public void getClassmateSummaryWork_InvalidOtherComponent_ThrowException()
       throws IOException, NoSuchMethodException, ObjectNotFoundException {
-    expectIsUserInRun(true);
+    setupStudent1InRunAndInPeriod();
     expectComponentType(NODE_ID1, COMPONENT_ID1, controller.SUMMARY_TYPE, OTHER_NODE_ID,
         OTHER_COMPONENT_ID, controller.PERIOD_SOURCE);
     replayAll();
     assertThrows(AccessDeniedException.class,
-        () -> controller.getClassmateSummaryWork(studentAuth, run1, run1Period1Id, NODE_ID1,
-            COMPONENT_ID1, OTHER_NODE_ID_NOT_ALLOWED, OTHER_COMPONENT_ID_NOT_ALLOWED,
-            controller.PERIOD_SOURCE));
+        () -> controller.getClassmateSummaryWork(studentAuth, run1, run1Period1Id,
+            OTHER_NODE_ID_NOT_ALLOWED, OTHER_COMPONENT_ID_NOT_ALLOWED, controller.PERIOD_SOURCE));
     verifyAll();
   }
 
@@ -75,20 +87,19 @@ public class ClassmateSummaryDataControllerTest extends AbstractClassmateDataCon
 
   private void getClassmateSummaryWork_InRunSummaryComponent_ReturnWork(String source)
       throws IOException, NoSuchMethodException, ObjectNotFoundException {
-    expectIsUserInRun(true);
+    setupStudent1InRunAndInPeriod();
     expectComponentType(NODE_ID1, COMPONENT_ID1, controller.SUMMARY_TYPE, OTHER_NODE_ID,
         OTHER_COMPONENT_ID, source);
     List<StudentWork> studentWork = Arrays.asList(new StudentWork(), new StudentWork());
     if (controller.PERIOD_SOURCE.equals(source)) {
-      expectStudentWork(run1, run1Period1, OTHER_NODE_ID, OTHER_COMPONENT_ID, studentWork);
+      expectLatestStudentWork(run1, run1Period1, OTHER_NODE_ID, OTHER_COMPONENT_ID, studentWork);
     } else if (controller.ALL_PERIODS_SOURCE.equals(source)) {
-      expectStudentWork(run1, OTHER_NODE_ID, OTHER_COMPONENT_ID, studentWork);
+      expectLatestStudentWork(run1, OTHER_NODE_ID, OTHER_COMPONENT_ID, studentWork);
     }
     replayAll();
     try {
       List<StudentWork> classmateSummaryWork = controller.getClassmateSummaryWork(studentAuth,
-          run1, run1Period1Id, NODE_ID1, COMPONENT_ID1, OTHER_NODE_ID, OTHER_COMPONENT_ID,
-          source);
+          run1, run1Period1Id, OTHER_NODE_ID, OTHER_COMPONENT_ID, source);
       assertEquals(classmateSummaryWork, studentWork);
     } catch (Exception e) {
       fail(SHOULD_NOT_HAVE_THROWN_EXCEPTION);
@@ -112,25 +123,37 @@ public class ClassmateSummaryDataControllerTest extends AbstractClassmateDataCon
 
   private void getClassmateSummaryAnnotations_InRunSummaryComponent_ReturnAnnotations(String source)
       throws IOException, NoSuchMethodException, ObjectNotFoundException {
-    expectIsUserInRun(true);
+    setupStudent1InRunAndInPeriod();
     expectComponentType(NODE_ID1, COMPONENT_ID1, controller.SUMMARY_TYPE, OTHER_NODE_ID,
         OTHER_COMPONENT_ID, source);
-    List<Annotation> annotations = Arrays.asList(new Annotation(), new Annotation());
+    Annotation annotation1 = createAnnotation(workgroup1, "score", new Timestamp(1000));
+    Annotation annotation2 = createAnnotation(workgroup2, "autoScore", new Timestamp(2000));
+    Annotation annotation3 = createAnnotation(workgroup2, "autoScore", new Timestamp(3000));
+    List<Annotation> allAnnotations = Arrays.asList(annotation1, annotation2, annotation3);
     if (controller.PERIOD_SOURCE.equals(source)) {
-      expectAnnotations(run1, run1Period1, OTHER_NODE_ID, OTHER_COMPONENT_ID, annotations);
+      expectAnnotations(run1, run1Period1, OTHER_NODE_ID, OTHER_COMPONENT_ID, allAnnotations);
     } else if (controller.ALL_PERIODS_SOURCE.equals(source)) {
-      expectAnnotations(run1, OTHER_NODE_ID, OTHER_COMPONENT_ID, annotations);
+      expectAnnotations(run1, OTHER_NODE_ID, OTHER_COMPONENT_ID, allAnnotations);
     }
     replayAll();
     try {
-      List<Annotation> classmateSummaryAnnotations = controller.getClassmateSummaryAnnotations(
-          studentAuth, run1, run1Period1Id, NODE_ID1, COMPONENT_ID1, OTHER_NODE_ID,
-          OTHER_COMPONENT_ID, source);
-      assertEquals(classmateSummaryAnnotations, annotations);
+      List<Annotation> classmateSummaryAnnotations = controller.getClassmateSummaryScores(
+          studentAuth, run1, run1Period1Id, OTHER_NODE_ID, OTHER_COMPONENT_ID, source);
+      List<Annotation> latestAnnotations = Arrays.asList(annotation1, annotation3);
+      assertEquals(classmateSummaryAnnotations, latestAnnotations);
     } catch (Exception e) {
       fail(SHOULD_NOT_HAVE_THROWN_EXCEPTION);
     }
     verifyAll();
+  }
+
+  private Annotation createAnnotation(Workgroup toWorkgroup, String type,
+      Timestamp serverSaveTime) {
+    Annotation annotation = new Annotation();
+    annotation.setToWorkgroup(toWorkgroup);
+    annotation.setType(type);
+    annotation.setServerSaveTime(serverSaveTime);
+    return annotation;
   }
 
   protected void expectComponentType(String nodeId, String componentId, String componentType,
@@ -141,6 +164,7 @@ public class ClassmateSummaryDataControllerTest extends AbstractClassmateDataCon
         .append("  \"nodes\": [")
         .append("    {")
         .append("      \"id\": \"" + nodeId + "\",")
+        .append("      \"type\": \"node\",")
         .append("      \"components\": [")
         .append("        {")
         .append("          \"id\": \"" + componentId + "\",")
