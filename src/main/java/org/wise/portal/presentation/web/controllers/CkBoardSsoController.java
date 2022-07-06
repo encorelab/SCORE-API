@@ -169,7 +169,7 @@ public class CkBoardSsoController {
   }
 
   private String generateCkBoardSsoLoginUrlWithPayload(String payload, String hashedPayload) {
-    return ckBoardUrl + "/session/sso_login/" + payload + "/" + hashedPayload;
+    return ckBoardUrl + "/sso/login/" + payload + "/" + hashedPayload;
   }
 
   public static String hmacDigest(String msg, String secretKey, String algorithm) {
