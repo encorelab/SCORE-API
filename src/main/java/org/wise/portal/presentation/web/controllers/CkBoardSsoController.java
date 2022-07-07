@@ -5,17 +5,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
@@ -23,10 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
-import org.wise.portal.dao.ObjectNotFoundException;
 import org.wise.portal.domain.authentication.MutableUserDetails;
 import org.wise.portal.domain.user.User;
-import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.portal.presentation.util.http.Base64;
 import org.wise.portal.service.user.UserService;
 import org.wise.portal.service.workgroup.WorkgroupService;
@@ -95,81 +89,33 @@ public class CkBoardSsoController {
     String payloadBase64 = Base64.encodeBytes(payload.getBytes());
     String payloadBase64UrlEncoded = URLEncoder.encode(payloadBase64, "UTF-8");
     String payloadBase64Hashed = hmacDigest(payloadBase64, secretKey, hashAlgorithm);
-    return generateCkBoardSsoLoginUrlWithPayload(payloadBase64UrlEncoded, payloadBase64Hashed);
+    return ckBoardUrl + "/sso/login/" + payloadBase64UrlEncoded + "/" + payloadBase64Hashed;
   }
 
   private String generateTeacherPayload(String nonce, User user, String redirectUrl)
       throws UnsupportedEncodingException {
     MutableUserDetails userDetails = user.getUserDetails();
+    Long userId = user.getId();
     String username = URLEncoder.encode(userDetails.getUsername(), "UTF-8");
-    String email = URLEncoder.encode(userDetails.getEmailAddress(), "UTF-8");
-    String redirectUrlWithoutParams = getRedirectUrlWithoutParams(redirectUrl);
-    return generatePayload(nonce, username, email, redirectUrlWithoutParams, null, TEACHER);
+    return generatePayload(nonce, userId, username, TEACHER, redirectUrl);
   }
 
   private String generateStudentPayload(String nonce, User user, String redirectUrl)
       throws UnsupportedEncodingException {
-    Long workgroupId = null;
-    String username = null;
-    try {
-      Long workgroupIdFromRedirectUrl = getWorkgroupIdFromRedirectUrl(redirectUrl);
-      Workgroup workgroup = workgroupService.retrieveById(workgroupIdFromRedirectUrl);
-      if (workgroup.getMembers().contains(user)) {
-        workgroupId = workgroupIdFromRedirectUrl;
-        username = workgroup.generateWorkgroupName();
-      }
-    } catch(ObjectNotFoundException e) {
-      e.printStackTrace();
-    }
-    String redirectUrlWithoutParams = getRedirectUrlWithoutParams(redirectUrl);
-    return generatePayload(nonce, username, null, redirectUrlWithoutParams, workgroupId, STUDENT);
+    Long userId = user.getId();
+    String username = user.getUserDetails().getCoreUsername();
+    return generatePayload(nonce, userId, username, STUDENT, redirectUrl);
   }
 
-  private String getRedirectUrlWithoutParams(String redirectUrl) {
-    String redirectUrlWithoutParams = null;
-    try {
-      URI uri = new URI(redirectUrl);
-      redirectUrlWithoutParams = uri.getPath();
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-    return redirectUrlWithoutParams;
-  }
-
-  private Long getWorkgroupIdFromRedirectUrl(String redirectUrl) {
-    Long workgroupId = null;
-    try {
-      List<NameValuePair> params =
-          URLEncodedUtils.parse(new URI(redirectUrl), Charset.forName("UTF-8"));
-      for (NameValuePair param : params) {
-        if (param.getName().equals("workgroup-id")) {
-          workgroupId = Long.parseLong(param.getValue());
-        }
-      }
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
-    return workgroupId;
-  }
-
-  private String generatePayload(String nonce, String username, String email, String redirectUrl,
-      Long workgroupId, String role) {
+  private String generatePayload(String nonce, Long userId, String username, String role,
+      String redirectUrl) {
     StringBuilder payloadBuffer = new StringBuilder();
     payloadBuffer.append("nonce=" + nonce + "&");
+    payloadBuffer.append("user-id=" + userId + "&");
     payloadBuffer.append("username=" + username + "&");
-    payloadBuffer.append("redirect-url=" + redirectUrl + "&");
-    if (email != null) {
-      payloadBuffer.append("email=" + email + "&");
-    }
-    if (workgroupId != null) {
-      payloadBuffer.append("workgroup-id=" + workgroupId + "&");
-    }
-    payloadBuffer.append("role=" + role);
+    payloadBuffer.append("role=" + role + "&");
+    payloadBuffer.append("redirect-url=" + redirectUrl);
     return payloadBuffer.toString();
-  }
-
-  private String generateCkBoardSsoLoginUrlWithPayload(String payload, String hashedPayload) {
-    return ckBoardUrl + "/sso/login/" + payload + "/" + hashedPayload;
   }
 
   public static String hmacDigest(String msg, String secretKey, String algorithm) {

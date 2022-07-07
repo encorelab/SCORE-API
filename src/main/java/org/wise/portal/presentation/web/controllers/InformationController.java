@@ -744,7 +744,6 @@ public class InformationController {
     config.put("renewSessionURL", contextPath + "/api/session/renew");
     config.put("sessionTimeout", request.getSession().getMaxInactiveInterval());
     config.put("sessionLogOutURL", contextPath + "/api/logout");
-    config.put("ckBoardUrl", appProperties.getProperty("ck_board_url"));
 
     User signedInUser = ControllerUtil.getSignedInUser();
     setUserLocale(request, signedInUser, config);
