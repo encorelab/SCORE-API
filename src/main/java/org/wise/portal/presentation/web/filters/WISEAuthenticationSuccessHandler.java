@@ -23,6 +23,8 @@
  */
 package org.wise.portal.presentation.web.filters;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.wise.portal.dao.ObjectNotFoundException;
 import org.wise.portal.domain.authentication.MutableUserDetails;
@@ -44,7 +49,9 @@ import org.wise.portal.service.portal.PortalService;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Locale;
 
@@ -123,6 +130,26 @@ public class WISEAuthenticationSuccessHandler
 
     request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, locale);
     userDetailsService.updateStatsOnSuccessfulLogin((MutableUserDetails) userDetails);
+
+    // redirect if specified in the login request
+    SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(request, response);
+    if (savedRequest != null) {
+      String redirectUrl = savedRequest.getRedirectUrl();
+      if (StringUtils.hasText(redirectUrl)) {
+        this.setDefaultTargetUrl(redirectUrl);
+        PrintWriter writer = response.getWriter();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        JSONObject responseObject = new JSONObject();
+        try {
+          responseObject.put("redirectUrl", redirectUrl);
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+        writer.print(responseObject);
+        writer.close();
+      }
+    }
     String redirectUrl = (String) request.getAttribute("redirectUrl");
     if (redirectUrl != null) {
       handleRedirectRequest(redirectUrl, request, response, userDetails, locale);
@@ -132,7 +159,7 @@ public class WISEAuthenticationSuccessHandler
     if (ControllerUtil.isUserPreviousAdministrator()) {
       response.sendRedirect(getUserHomeUrl(userDetails, locale));
     }
-    //super.handle(request, response, authentication);
+    request.getSession().setAttribute(SessionLocaleResolver.LOCALE_SESSION_ATTRIBUTE_NAME, locale);
   }
 
   private void handleRedirectRequest(String redirectUrl, HttpServletRequest request,
