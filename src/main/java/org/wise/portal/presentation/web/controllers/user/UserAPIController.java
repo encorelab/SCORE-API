@@ -176,6 +176,7 @@ public class UserAPIController {
     config.put("wise4Hostname", appProperties.getProperty("wise4.hostname"));
     config.put("discourseURL", appProperties.getProperty("discourse_url"));
     config.put("discourseNewsCategory", appProperties.getProperty("discourse_news_category"));
+    config.put("ckBoardUrl", appProperties.getProperty("ck_board_url"));
     return config;
   }
 
