@@ -102,22 +102,12 @@ public class ClassmateDataControllerTest extends AbstractClassmateDataController
 
   private void expectGetProjectContent(String nodeId, String componentId, String componentType)
       throws IOException {
-    String projectJSONString = new StringBuilder()
-        .append("{")
-        .append("  \"nodes\": [")
-        .append("    {")
-        .append("      \"id\": \"" + nodeId + "\",")
-        .append("      \"type\": \"node\",")
-        .append("      \"components\": [")
-        .append("        {")
+    String projectJSONString = new StringBuilder().append("{").append("  \"nodes\": [")
+        .append("    {").append("      \"id\": \"" + nodeId + "\",")
+        .append("      \"type\": \"node\",").append("      \"components\": [").append("        {")
         .append("          \"id\": \"" + componentId + "\",")
-        .append("          \"type\": \"" + componentType + "\"")
-        .append("        }")
-        .append("      ]")
-        .append("    }")
-        .append("  ]")
-        .append("}")
-        .toString();
+        .append("          \"type\": \"" + componentType + "\"").append("        }")
+        .append("      ]").append("    }").append("  ]").append("}").toString();
     expect(projectService.getProjectContent(project1)).andReturn(projectJSONString);
   }
 }

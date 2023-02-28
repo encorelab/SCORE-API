@@ -41,7 +41,8 @@ public abstract class AbstractClassmateDataControllerTest extends APIControllerT
 
   protected void expectLatestStudentWork(Run run, Group period, String nodeId, String componentId,
       List<StudentWork> studentWork) {
-    expect(vleService.getLatestStudentWork(run, period, nodeId, componentId)).andReturn(studentWork);
+    expect(vleService.getLatestStudentWork(run, period, nodeId, componentId))
+        .andReturn(studentWork);
   }
 
   protected void expectLatestStudentWork(Run run, String nodeId, String componentId,
@@ -116,22 +117,12 @@ public abstract class AbstractClassmateDataControllerTest extends APIControllerT
 
   protected void expectComponentType(String nodeId, String componentId, String componentType)
       throws IOException, ObjectNotFoundException {
-    String projectJSONString = new StringBuilder()
-        .append("{")
-        .append("  \"nodes\": [")
-        .append("    {")
-        .append("      \"id\": \"" + nodeId + "\",")
-        .append("      \"type\": \"node\",")
-        .append("      \"components\": [")
-        .append("        {")
+    String projectJSONString = new StringBuilder().append("{").append("  \"nodes\": [")
+        .append("    {").append("      \"id\": \"" + nodeId + "\",")
+        .append("      \"type\": \"node\",").append("      \"components\": [").append("        {")
         .append("          \"id\": \"" + componentId + "\",")
-        .append("          \"type\": \"" + componentType + "\"")
-        .append("        }")
-        .append("      ]")
-        .append("    }")
-        .append("  ]")
-        .append("}")
-        .toString();
+        .append("          \"type\": \"" + componentType + "\"").append("        }")
+        .append("      ]").append("    }").append("  ]").append("}").toString();
     expect(projectService.getProjectContent(project1)).andReturn(projectJSONString);
   }
 
