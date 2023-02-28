@@ -28,8 +28,7 @@ public class ClassmateDiscussionDataController extends ClassmateDataController {
   @GetMapping("/student-work/{runId}/{periodId}/{nodeId}/{componentId}")
   public List<StudentWork> getClassmateDiscussionWork(Authentication auth,
       @PathVariable("runId") RunImpl run, @PathVariable Long periodId, @PathVariable String nodeId,
-      @PathVariable String componentId)
-      throws IOException, JSONException, ObjectNotFoundException {
+      @PathVariable String componentId) throws IOException, JSONException, ObjectNotFoundException {
     Group period = groupService.retrieveById(periodId);
     if (isAllowedToGetData(auth, run, period, nodeId, componentId)) {
       return getStudentWork(run, period, nodeId, componentId);

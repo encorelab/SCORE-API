@@ -67,8 +67,8 @@ public class ClassmateGraphDataController extends ClassmateDataController {
   private boolean isAllowedToGetData(Authentication auth, Run run, String nodeId,
       String componentId, String showWorkNodeId, String showWorkComponentId,
       String showClassmateWorkSource) throws IOException, JSONException, ObjectNotFoundException {
-    return isStudentInRun(auth, run) && isValidGraphComponent(run, nodeId, componentId, showWorkNodeId,
-        showWorkComponentId, showClassmateWorkSource);
+    return isStudentInRun(auth, run) && isValidGraphComponent(run, nodeId, componentId,
+        showWorkNodeId, showWorkComponentId, showClassmateWorkSource);
   }
 
   private boolean isValidGraphComponent(Run run, String nodeId, String componentId,

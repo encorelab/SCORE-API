@@ -265,6 +265,8 @@ public class StudentPostDataController {
                     annotationJSONObject.isNull("clientSaveTime") ? null
                       : annotationJSONObject.getString("clientSaveTime"));
               }
+              annotation.convertToClientAnnotation();
+              broadcastAnnotationToTeacher(annotation);
 
               // before returning saved Annotation, strip all fields except id, responseToken, and
               // serverSaveTime to minimize response size

@@ -37,4 +37,65 @@ public class SendNodeToPeriodController {
       redisPublisher.publish(msg.toString());
     }
   }
+
+  @MessageMapping("/api/teacher/run/{runId}/workgroup-to-node/{workgroupId}/{nodeId}")
+  public void sendWorkgroupToNode(Authentication auth, @DestinationVariable Long runId,
+      @DestinationVariable String workgroupId, @DestinationVariable String nodeId)
+      throws ObjectNotFoundException, JSONException {
+    Run run = runService.retrieveById(runId);
+    if (runService.hasReadPermission(auth, run)) {
+      this.publishWorkgroupToNodeMessage(workgroupId, nodeId);
+    }
+  }
+
+  @MessageMapping("/api/teacher/run/{runId}/group-to-node/{groupId}/{nodeId}")
+  @Transactional
+  public void sendGroupToNode(Authentication auth, @DestinationVariable Long runId,
+      @DestinationVariable Integer groupId, @DestinationVariable String nodeId)
+      throws ObjectNotFoundException, JSONException {
+    Run run = runService.retrieveById(runId);
+    if (runService.hasReadPermission(auth, run)) {
+      Tag tag = tagService.getTagById(groupId);
+      for (Workgroup workgroup : runService.getWorkgroups(runId)) {
+        if (workgroup.getTags().contains(tag)) {
+          this.publishWorkgroupToNodeMessage(workgroup.getId().toString(), nodeId);
+        }
+      }
+    }
+  }
+
+  private void publishWorkgroupToNodeMessage(String workgroupId, String nodeId)
+      throws JSONException {
+    JSONObject msg = new JSONObject();
+    msg.put("type", "goToNode");
+    msg.put("nodeId", nodeId);
+    msg.put("topic", String.format("/topic/workgroup/%s", workgroupId));
+    redisPublisher.publish(msg.toString());
+  }
+
+  @MessageMapping("/api/teacher/run/{runId}/workgroup-to-next-node/{workgroupId}")
+  public void sendWorkgroupToNextNode(Authentication auth, @DestinationVariable Long runId,
+      @DestinationVariable String workgroupId) throws ObjectNotFoundException, JSONException {
+    Run run = runService.retrieveById(runId);
+    if (runService.hasReadPermission(auth, run)) {
+      JSONObject msg = new JSONObject();
+      msg.put("type", "goToNextNode");
+      msg.put("topic", String.format("/topic/workgroup/%s", workgroupId));
+      redisPublisher.publish(msg.toString());
+    }
+  }
+
+  @MessageMapping("/api/teacher/run/{runId}/period-to-node/{periodId}/{nodeId}")
+  public void sendPeriodToNode(Authentication auth, @DestinationVariable Long runId,
+      @DestinationVariable Long periodId, @DestinationVariable String nodeId)
+      throws ObjectNotFoundException, JSONException {
+    Run run = runService.retrieveById(runId);
+    if (runService.hasReadPermission(auth, run)) {
+      JSONObject msg = new JSONObject();
+      msg.put("type", "goToNode");
+      msg.put("nodeId", nodeId);
+      msg.put("topic", String.format("/topic/classroom/%s/%s", runId, periodId));
+      redisPublisher.publish(msg.toString());
+    }
+  }
 }

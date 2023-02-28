@@ -29,7 +29,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   }
 
   @Override
-  public void configureWebSocketTransport(WebSocketTransportRegistration webSocketTransportRegistration) {
+  public void configureWebSocketTransport(
+      WebSocketTransportRegistration webSocketTransportRegistration) {
 
   }
 
