@@ -38,8 +38,8 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.session.Session;
 import org.wise.portal.service.session.SessionService;
 
-public class WISELogoutHandler<S extends Session> extends SecurityContextLogoutHandler implements
-    ApplicationListener<SessionDestroyedEvent> {
+public class WISELogoutHandler<S extends Session> extends SecurityContextLogoutHandler
+    implements ApplicationListener<SessionDestroyedEvent> {
 
   @Autowired
   protected SessionService sessionService;
@@ -49,6 +49,9 @@ public class WISELogoutHandler<S extends Session> extends SecurityContextLogoutH
       Authentication authentication) {
     if (authentication != null) {
       sessionService.removeUser((UserDetails) authentication.getPrincipal());
+      if (sessionService.isCkBoardAvailable()) {
+        sessionService.signOutOfCkBoard(request);
+      }
     }
     super.logout(request, response, authentication);
   }
