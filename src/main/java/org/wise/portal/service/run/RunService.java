@@ -189,6 +189,10 @@ public interface RunService {
   void removeSharedTeacherPermission(Long runId, Long userId, Integer permissionId)
       throws ObjectNotFoundException;
 
+  @Secured({ "ROLE_TEACHER" })
+  @Transactional()
+  void updateCkProjectConnectCode(Long runId, String code) throws ObjectNotFoundException;
+
   /**
    * Removes specified teacher user from specified run. Also removes any shared permission on the
    * project of the run.

@@ -264,6 +264,7 @@ public class UserAPIController {
     map.put("owner", convertUserToMap(run.getOwner()));
     map.put("numStudents", run.getNumStudents());
     map.put("wiseVersion", run.getProject().getWiseVersion());
+    map.put("connectCode", run.getConnectCode());
 
     if (user.isStudent()) {
       addStudentInfoToRunMap(user, run, map);
