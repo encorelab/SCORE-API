@@ -397,4 +397,8 @@ public interface Run extends Persistable {
   boolean isLockedAfterEndDate();
 
   void setLockedAfterEndDate(boolean isLockedAfterEndDate);
+
+  String getConnectCode();
+
+  void setConnectCode(String connectCode);
 }
