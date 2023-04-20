@@ -127,6 +127,9 @@ public class RunImpl implements Run {
   @Transient
   private static final String COLUMN_NAME_IS_LOCKED_AFTER_END_DATE = "isLockedAfterEndDate";
 
+  @Transient
+  private static final String COLUMN_NAME_CK_PROJECT_CODE = "ckProjectCode";
+
   @Id
   @Getter
   @Setter
@@ -246,6 +249,11 @@ public class RunImpl implements Run {
   @Getter
   @Setter
   private boolean isRandomPeriodAssignment = false;
+
+  @Column(name = RunImpl.COLUMN_NAME_CK_PROJECT_CODE)
+  @Getter
+  @Setter
+  private String connectCode;
 
   public Group getPeriodByName(String periodName) throws PeriodNotFoundException {
     Set<Group> periods = getPeriods();

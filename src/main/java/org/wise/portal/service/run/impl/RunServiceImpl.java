@@ -444,6 +444,12 @@ public class RunServiceImpl implements RunService {
     }
   }
 
+  public void updateCkProjectConnectCode(Long runId, String code) throws ObjectNotFoundException {
+    Run run = retrieveById(runId);
+    run.setConnectCode(code);
+    runDao.save(run);
+  }
+
   public void removeSharedTeacher(String username, Long runId) throws ObjectNotFoundException {
     Run run = retrieveById(runId);
     User user = userDao.retrieveByUsername(username);

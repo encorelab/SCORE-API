@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.StaleObjectStateException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.hibernate5.HibernateOptimisticLockingFailureException;
@@ -62,6 +63,7 @@ import org.wise.portal.domain.project.impl.Projectcode;
 import org.wise.portal.domain.run.Run;
 import org.wise.portal.domain.user.User;
 import org.wise.portal.domain.workgroup.Workgroup;
+import org.wise.portal.presentation.web.controllers.ControllerUtil;
 import org.wise.portal.presentation.web.controllers.user.UserAPIController;
 import org.wise.portal.presentation.web.exception.InvalidNameException;
 import org.wise.portal.presentation.web.response.ErrorResponse;
@@ -255,7 +257,7 @@ public class StudentAPIController extends UserAPIController {
    *         return a map containing an error field with an error string.
    */
   @PostMapping("/run/register")
-  HashMap<String, Object> addStudentToRun(Authentication auth,
+  HashMap<String, Object> addStudentToRun(HttpServletRequest request, Authentication auth,
       @RequestParam("runCode") String runCode, @RequestParam("period") String period) {
     User user = userService.retrieveUserByUsername(auth.getName());
     Run run = getRun(runCode);
@@ -270,6 +272,19 @@ public class StudentAPIController extends UserAPIController {
     while (currentLoopIndex < maxLoop) {
       try {
         studentService.addStudentToRun(user, projectCode);
+        String connectCode = run.getConnectCode();
+        if (connectCode != null && !connectCode.equals("")) {
+          try {
+            String url = "/api/projects/score/addMember";
+            JSONObject params = new JSONObject();
+            params.put("username", user.getUserDetails().getUsername());
+            params.put("role", "student");
+            params.put("code", connectCode);
+            ControllerUtil.doCkBoardPost(request, auth, params.toString(), url);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
         HashMap<String, Object> runMap = getRunMap(user, run);
         return runMap;
       } catch (ObjectNotFoundException e) {

@@ -18,6 +18,7 @@ import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
 import org.wise.portal.domain.authentication.impl.StudentUserDetails;
 import org.wise.portal.domain.authentication.impl.TeacherUserDetails;
+import org.wise.portal.presentation.web.controllers.ControllerUtil;
 import org.wise.portal.service.session.SessionService;
 
 @Service
@@ -108,41 +109,15 @@ public class SessionServiceImpl<S extends Session> implements SessionService {
   }
 
   public void signOutOfCkBoard(HttpServletRequest request) {
-    String ckSessionCookie = getCkSessionCookie(request);
+    String ckSessionCookie = ControllerUtil.getCkSessionCookie(request);
     HttpClient client = HttpClientBuilder.create().build();
-    HttpPost ckBoardLogoutRequest = new HttpPost(getCkBoardLogoutUrl());
+    HttpPost ckBoardLogoutRequest = new HttpPost(ControllerUtil.getCkBoardUrl("/api/auth/logout"));
     ckBoardLogoutRequest.setHeader("Authorization", "Bearer " + ckSessionCookie);
     try {
       client.execute(ckBoardLogoutRequest);
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private String getCkBoardLogoutUrl() {
-    String ckBoardUrl = appProperties.getProperty("ck_board_url");
-
-    // The CK Board local backend url is only used for local development and should only be set in
-    // local development environments. When we are running locally, we need the local IP and port of
-    // the CK Board backend because the SCORE API is served using Docker. If the SCORE API makes a
-    // request to localhost:8001, it won't be able to access the CK Board backend. This is because
-    // the SCORE API expects localhost to be within the container but the CK Board backend is not in
-    // the container.
-    String ckBoardLocalBackendUrl = appProperties.getProperty("ck_board_local_backend_url");
-    if (ckBoardLocalBackendUrl != null && !ckBoardLocalBackendUrl.equals("")) {
-      ckBoardUrl = ckBoardLocalBackendUrl;
-    }
-    return ckBoardUrl + "/api/auth/logout";
-  }
-
-  private String getCkSessionCookie(HttpServletRequest request) {
-    Cookie[] cookies = request.getCookies();
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("CK_SESSION")) {
-        return cookie.getValue();
-      }
-    }
-    return null;
   }
 
 }
