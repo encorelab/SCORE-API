@@ -104,7 +104,7 @@ public class WorkgroupTagAPIControllerTest extends APIControllerTest {
   }
 
   @Test
-  public void deleteTag_TeacherDoesNotHavePermission_AccessDenied() {
+  public void deleteTag_TeacherDoesNotHavePermission_AccessDenied() throws Exception {
     expect(tagService.canEditTag(teacherAuth, tag1)).andReturn(false);
     replay(tagService);
     try {
@@ -116,7 +116,7 @@ public class WorkgroupTagAPIControllerTest extends APIControllerTest {
   }
 
   @Test
-  public void deleteTag_TeacherHasPermission_DeleteTag() {
+  public void deleteTag_TeacherHasPermission_DeleteTag() throws Exception {
     expect(tagService.canEditTag(teacherAuth, tag1)).andReturn(true);
     tagService.deleteTag(teacherAuth, tag1);
     expectLastCall();
@@ -168,7 +168,8 @@ public class WorkgroupTagAPIControllerTest extends APIControllerTest {
   @Test
   public void getTagsForWorkgroup_CanNotReadTags_AccessDenied() throws ObjectNotFoundException {
     expect(workgroupService.retrieveById(workgroup1.getId())).andReturn(workgroup1);
-    expect(userService.retrieveUserByUsername(student1UserDetails.getUsername())).andReturn(student1);
+    expect(userService.retrieveUserByUsername(student1UserDetails.getUsername()))
+        .andReturn(student1);
     expect(workgroupService.isUserInWorkgroupForRun(student1, workgroup1.getRun(), workgroup1))
         .andReturn(false);
     expect(runService.hasReadPermission(studentAuth, workgroup1.getRun())).andReturn(false);
