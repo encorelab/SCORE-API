@@ -9,9 +9,13 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.wise.portal.dao.ObjectNotFoundException;
+import org.wise.portal.domain.Tag;
 import org.wise.portal.domain.run.Run;
+import org.wise.portal.domain.workgroup.Workgroup;
 import org.wise.portal.service.run.RunService;
+import org.wise.portal.service.tag.TagService;
 import org.wise.portal.spring.data.redis.MessagePublisher;
 
 @Secured({ "ROLE_TEACHER" })
@@ -23,6 +27,9 @@ public class SendNodeToPeriodController {
 
   @Autowired
   private RunService runService;
+
+  @Autowired
+  private TagService tagService;
 
   @MessageMapping("/api/teacher/run/{runId}/node-to-period/{periodId}")
   public void sendNodeToPeriod(Authentication auth, @DestinationVariable Long runId,
