@@ -12,6 +12,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,12 @@ public class TeacherAPIController extends UserAPIController {
 
   @Value("${google.clientSecret:}")
   private String googleClientSecret;
+
+  @Value("${ck_board_url}")
+  private String ckBoardUrl;
+
+  @Value("${ck_board_local_backend_url}")
+  private String ckBoardBackendUrl;
 
   @GetMapping("/runs")
   List<HashMap<String, Object>> getRuns(Authentication auth,
@@ -469,4 +476,69 @@ public class TeacherAPIController extends UserAPIController {
     }
     return response;
   }
+
+  @PostMapping("/run/score/link")
+  Map<String, Object> linkRunToCkProject(Authentication authentication,
+      @RequestParam("runId") Long runId, @RequestParam("code") String code,
+      HttpServletRequest request) {
+    Map<String, Object> result = new HashMap<>();
+    try {
+      User user = userService.retrieveUserByUsername(authentication.getName());
+      Run run = runService.retrieveById(runId);
+      if (run.isTeacherAssociatedToThisRun(user)) {
+        String url = "/api/projects/score/link";
+        JSONObject params = new JSONObject();
+        params.put("runId", runId);
+        params.put("code", code);
+        String jsonRes = ControllerUtil.doCkBoardPost(request, authentication, params.toString(),
+            url);
+        if (jsonRes != null) {
+          JSONObject json = new JSONObject(jsonRes);
+          if (json.has("code") && json.getString("code").equals(code)) {
+            runService.updateCkProjectConnectCode(runId, code);
+            result.put("code", code);
+          }
+          if (json.has("message")) {
+            result.put("message", json.getString("message"));
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return result;
+  }
+
+  @PostMapping("/run/score/unlink")
+  Map<String, Object> ulinkRunFromCkProject(Authentication authentication,
+      @RequestParam("runId") Long runId, @RequestParam("code") String code,
+      HttpServletRequest request) {
+    Map<String, Object> result = new HashMap<>();
+    try {
+      User user = userService.retrieveUserByUsername(authentication.getName());
+      Run run = runService.retrieveById(runId);
+      if (run.isTeacherAssociatedToThisRun(user)) {
+        String url = "/api/projects/score/unlink";
+        JSONObject params = new JSONObject();
+        params.put("runId", runId);
+        params.put("code", code);
+        String jsonRes = ControllerUtil.doCkBoardPost(request, authentication, params.toString(),
+            url);
+        if (jsonRes != null) {
+          JSONObject json = new JSONObject(jsonRes);
+          if (json.has("code") && json.getString("code").equals(code)) {
+            runService.updateCkProjectConnectCode(runId, "");
+            result.put("code", code);
+          }
+          if (json.has("message")) {
+            result.put("message", json.getString("message"));
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return result;
+  }
+
 }

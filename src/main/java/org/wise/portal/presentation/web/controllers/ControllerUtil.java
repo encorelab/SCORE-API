@@ -30,19 +30,27 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.acls.model.Permission;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -216,6 +224,7 @@ public class ControllerUtil {
     runJSON.put("runCode", run.getRuncode());
     runJSON.put("startTime", run.getStartTimeMilliseconds());
     runJSON.put("endTime", run.getEndTimeMilliseconds());
+    runJSON.put("code", run.getConnectCode());
     Set<Group> periods = run.getPeriods();
     JSONArray periodsArray = new JSONArray();
     for (Group period : periods) {
@@ -502,4 +511,56 @@ public class ControllerUtil {
     }
     return response;
   }
+
+  /**
+   * Do a POST request to CK Backend for:
+   * 1. Linking run to CK Board project.
+   * 2. Unlinking run from CK Board project.
+   * 3. Adding members of a run to CK Board project.
+   */
+  public static String doCkBoardPost(HttpServletRequest request, Authentication authentication,
+      String params, String url) {
+    try {
+      String ckSessionCookie = getCkSessionCookie(request);
+      if (ckSessionCookie != null) {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPost ckBoardLinkReq = new HttpPost(getCkBoardUrl(url));
+        ckBoardLinkReq.addHeader("content-type", "application/json");
+        ckBoardLinkReq.setHeader("Authorization", "Bearer " + ckSessionCookie);
+        ckBoardLinkReq.setEntity(new StringEntity(params, ContentType.APPLICATION_JSON));
+        HttpEntity response = client.execute(ckBoardLinkReq).getEntity();
+        return EntityUtils.toString(response);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public static String getCkBoardUrl(String apiEndpoint) {
+    String ckBoardUrl = appProperties.getProperty("ck_board_url");
+    
+    // The CK Board local backend url is only used for local development and should only be set in
+    // local development environments. When we are running locally, we need the local IP and port of
+    // the CK Board backend because the SCORE API is served using Docker. If the SCORE API makes a
+    // request to localhost:8001, it won't be able to access the CK Board backend. This is because
+    // the SCORE API expects localhost to be within the container but the CK Board backend is not in
+    // the container.
+    String ckBoardLocalBackendUrl = appProperties.getProperty("ck_board_local_backend_url");
+    if (ckBoardLocalBackendUrl != null && !ckBoardLocalBackendUrl.equals("")) {
+      ckBoardUrl = ckBoardLocalBackendUrl;
+    }
+    return ckBoardUrl + apiEndpoint;
+  }
+
+  public static String getCkSessionCookie(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equals("CK_SESSION")) {
+        return cookie.getValue();
+      }
+    }
+    return null;
+  }
+
 }
