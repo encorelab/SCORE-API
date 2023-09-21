@@ -50,11 +50,11 @@ create table acl_object_identity
     id                     bigint not null auto_increment,
     object_id_identity     bigint not null,
     object_id_identity_num integer,
-    entries_inheriting     bit    not null,
-    OPTLOCK                integer,
-    object_id_class        bigint not null,
-    owner_sid              bigint,
-    parent_object          bigint,
+    entries_inheriting bit not null,
+    OPTLOCK integer default 0,
+    object_id_class bigint not null,
+    owner_sid bigint,
+    parent_object bigint,
     constraint acl_object_identityObjectIdClassFK foreign key (object_id_class) references acl_class (id),
     constraint acl_object_identityOwnerSidFK foreign key (owner_sid) references acl_sid (id),
     constraint acl_object_identityParentObjectFK foreign key (parent_object) references acl_object_identity (id),
@@ -637,6 +637,22 @@ CREATE TABLE task_requests
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 3
   DEFAULT CHARSET = utf8;
+
+CREATE TABLE `user_tags` (
+    id bigint not null auto_increment,
+    users_fk bigint not null,
+    text varchar(100) not null,
+    constraint user_tags_users_fk foreign key (users_fk) references users (id),
+    primary key (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `acl_object_identity_to_user_tags` (
+    acl_object_identity_fk bigint not null,
+    user_tags_fk bigint not null,
+    constraint acl_object_identity_to_user_tags_acl_object_identity_fk foreign key (acl_object_identity_fk) references acl_object_identity (id),
+    constraint acl_object_identity_to_user_tags_user_tags_fk foreign key (user_tags_fk) references user_tags (id),
+    primary key (acl_object_identity_fk, user_tags_fk)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- initial data for wise below
 
