@@ -1,12 +1,14 @@
 package org.wise.portal.presentation.web.controllers.teacher;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +35,7 @@ import org.wise.portal.domain.group.Group;
 import org.wise.portal.domain.run.Run;
 import org.wise.portal.domain.user.User;
 import org.wise.portal.domain.workgroup.Workgroup;
+import org.wise.portal.domain.usertag.UserTag;
 import org.wise.portal.presentation.web.controllers.ControllerUtil;
 import org.wise.portal.presentation.web.controllers.user.UserAPIController;
 import org.wise.portal.presentation.web.exception.InvalidNameException;
@@ -40,6 +43,7 @@ import org.wise.portal.presentation.web.response.ResponseEntityGenerator;
 import org.wise.portal.presentation.web.response.SimpleResponse;
 import org.wise.portal.service.authentication.DuplicateUsernameException;
 import org.wise.portal.service.authentication.UserDetailsService;
+import org.wise.portal.service.usertags.UserTagsService;
 
 /**
  * Teacher REST API
@@ -55,6 +59,9 @@ public class TeacherAPIController extends UserAPIController {
 
   @Autowired
   private UserDetailsService userDetailsService;
+
+  @Autowired
+  private UserTagsService userTagsService;
 
   @Value("${google.clientId:}")
   private String googleClientId;
@@ -78,9 +85,18 @@ public class TeacherAPIController extends UserAPIController {
   private List<HashMap<String, Object>> getRunsList(User user, List<Run> runs) {
     List<HashMap<String, Object>> runsList = new ArrayList<HashMap<String, Object>>();
     for (Run run : runs) {
-      runsList.add(getRunMap(user, run));
+      HashMap<String, Object> runMap = getRunMap(user, run);
+      Set<UserTag> tags = userTagsService.getTags(user, run.getProject());
+      ((HashMap<String, Object>) runMap.get("project")).put("tags", getTagsList(tags));
+      runsList.add(runMap);
     }
     return runsList;
+  }
+
+  private List<String> getTagsList(Set<UserTag> tags) {
+    List<String> tagsList = tags.stream().map(tag -> tag.getText()).collect(Collectors.toList());
+    Collections.sort(tagsList);
+    return tagsList;
   }
 
   @GetMapping("/run/{runId}")
